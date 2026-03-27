@@ -186,12 +186,10 @@
     /* SANTA SLEIGH */
     #santa-sleigh {
       position: fixed;
-      top: 18vh;
-      left: -620px;
-      width: 580px;
       z-index: 4;
       pointer-events: none;
       filter: drop-shadow(0 0 6px rgba(255,200,100,0.4));
+      transform: scaleX(-1);
     }
 
     /* NEON TEXT */
@@ -437,23 +435,32 @@
 
     // --- SANTA SLEIGH ---
     const sleigh = document.getElementById('santa-sleigh');
-    let sleighX = -520;
+    let sleighX = 0;
+    let sleighW = 400;
+    let sleighSpeed = 3.5;
     let sleighActive = false;
 
     function launchSleigh() {
-      sleighX = -620;
+      // randomise size: small (far), medium, large (close)
+      sleighW = 180 + Math.random() * 480; // 180–660px
+      sleighSpeed = 2 + (sleighW / 660) * 4; // faster when bigger/closer
+      sleigh.style.width = sleighW + 'px';
+
+      // start off the right edge
+      sleighX = window.innerWidth + 20;
       sleighActive = true;
-      const yPos = 8 + Math.random() * 35;
+
+      const yPos = 5 + Math.random() * 40;
       sleigh.style.top = yPos + 'vh';
+      sleigh.style.left = sleighX + 'px';
     }
 
     function updateSleigh() {
       if (sleighActive) {
-        sleighX += 3.5;
+        sleighX -= sleighSpeed;
         sleigh.style.left = sleighX + 'px';
-        if (sleighX > window.innerWidth + 100) {
+        if (sleighX < -(sleighW + 20)) {
           sleighActive = false;
-          // fly again in 15–30 seconds
           setTimeout(launchSleigh, 15000 + Math.random() * 15000);
         }
       }
