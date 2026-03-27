@@ -187,59 +187,56 @@
     #santa-sleigh {
       position: fixed;
       top: 18vh;
-      left: -520px;
-      width: 500px;
+      left: -620px;
+      width: 580px;
       z-index: 4;
       pointer-events: none;
-      filter: drop-shadow(0 0 6px rgba(255,200,100,0.5));
-    }
-
-    @keyframes rudolph-pulse {
-      0%, 100% { filter: drop-shadow(0 0 6px #ff3300) drop-shadow(0 0 14px #ff6600); }
-      50%       { filter: drop-shadow(0 0 12px #ff0000) drop-shadow(0 0 28px #ff4400); }
-    }
-
-    #rudolph-nose {
-      animation: rudolph-pulse 0.8s ease-in-out infinite;
+      filter: drop-shadow(0 0 6px rgba(255,200,100,0.4));
     }
 
     /* NEON TEXT */
+    @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
+
     #neon-text {
       position: fixed;
-      top: 18px;
+      top: 14px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
-      font-family: 'Courier New', monospace;
-      font-size: clamp(16px, 3vw, 42px);
-      font-weight: bold;
-      letter-spacing: 0.08em;
+      font-family: 'Bungee', 'Arial Black', sans-serif;
+      font-size: clamp(22px, 5vw, 68px);
+      font-weight: 900;
+      letter-spacing: 0.12em;
       white-space: nowrap;
       color: #fff;
       text-shadow:
-        0 0 5px #fff,
+        0 0 4px #fff,
         0 0 10px #fff,
-        0 0 20px #ff00de,
-        0 0 40px #ff00de,
-        0 0 80px #ff00de,
-        0 0 90px #ff00de;
+        0 0 18px #fff,
+        0 0 38px #ff00de,
+        0 0 70px #ff00de,
+        0 0 100px #ff00de,
+        0 0 140px #ff00de;
       animation: neon-flicker 4s infinite;
       pointer-events: none;
+      -webkit-text-stroke: 1px rgba(255,0,222,0.4);
     }
 
     @keyframes neon-flicker {
-      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+      0%, 18%, 22%, 25%, 53%, 57%, 100% {
         text-shadow:
-          0 0 5px #fff,
+          0 0 4px #fff,
           0 0 10px #fff,
-          0 0 20px #ff00de,
-          0 0 40px #ff00de,
-          0 0 80px #ff00de;
+          0 0 18px #fff,
+          0 0 38px #ff00de,
+          0 0 70px #ff00de,
+          0 0 100px #ff00de,
+          0 0 140px #ff00de;
         opacity: 1;
       }
-      20%, 24%, 55% {
+      19%, 24%, 55% {
         text-shadow: none;
-        opacity: 0.6;
+        opacity: 0.5;
       }
     }
 
@@ -337,106 +334,7 @@
   </svg>
 
   <!-- SANTA SLEIGH -->
-  <svg id="santa-sleigh" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
-    <!-- reins -->
-    <path d="M 460 55 Q 420 30 380 45 Q 340 30 300 45 Q 260 30 220 45 Q 180 30 140 42" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
-    <path d="M 460 60 Q 420 38 380 52 Q 340 38 300 52 Q 260 38 220 52 Q 180 38 140 50" stroke="#c8a96e" stroke-width="1.5" fill="none"/>
-
-    <!-- reindeer 1 (back) -->
-    <g transform="translate(60,28)">
-      <ellipse cx="0" cy="0" rx="18" ry="9" fill="#8B4513"/>
-      <circle cx="18" cy="-4" r="7" fill="#8B4513"/>
-      <line x1="-10" y1="9" x2="-12" y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="-4"  y1="9" x2="-4"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="4"   y1="9" x2="6"   y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="10"  y1="9" x2="12"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <!-- antlers -->
-      <line x1="16" y1="-10" x2="12" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="12" y1="-20" x2="8"  y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="12" y1="-20" x2="16" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="20" y1="-10" x2="24" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="24" y1="-20" x2="20" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="24" y1="-20" x2="28" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <circle cx="24" cy="-4" r="2" fill="#1a0a00"/>
-    </g>
-
-    <!-- reindeer 2 -->
-    <g transform="translate(140,22)">
-      <ellipse cx="0" cy="0" rx="18" ry="9" fill="#8B4513"/>
-      <circle cx="18" cy="-4" r="7" fill="#8B4513"/>
-      <line x1="-10" y1="9" x2="-12" y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="-4"  y1="9" x2="-3"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="4"   y1="9" x2="5"   y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="10"  y1="9" x2="12"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="16" y1="-10" x2="12" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="12" y1="-20" x2="8"  y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="12" y1="-20" x2="16" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="20" y1="-10" x2="24" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="24" y1="-20" x2="20" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="24" y1="-20" x2="28" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <circle cx="24" cy="-4" r="2" fill="#1a0a00"/>
-    </g>
-
-    <!-- reindeer 3 -->
-    <g transform="translate(220,18)">
-      <ellipse cx="0" cy="0" rx="18" ry="9" fill="#8B4513"/>
-      <circle cx="18" cy="-4" r="7" fill="#8B4513"/>
-      <line x1="-10" y1="9" x2="-12" y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="-4"  y1="9" x2="-4"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="4"   y1="9" x2="6"   y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="10"  y1="9" x2="12"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="16" y1="-10" x2="12" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="12" y1="-20" x2="8"  y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="12" y1="-20" x2="16" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="20" y1="-10" x2="24" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="24" y1="-20" x2="20" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="24" y1="-20" x2="28" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <circle cx="24" cy="-4" r="2" fill="#1a0a00"/>
-    </g>
-
-    <!-- Rudolph (lead reindeer) -->
-    <g transform="translate(300,14)">
-      <ellipse cx="0" cy="0" rx="18" ry="9" fill="#8B4513"/>
-      <circle cx="18" cy="-4" r="7" fill="#8B4513"/>
-      <line x1="-10" y1="9" x2="-12" y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="-4"  y1="9" x2="-4"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="4"   y1="9" x2="6"   y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="10"  y1="9" x2="12"  y2="22" stroke="#8B4513" stroke-width="2.5"/>
-      <line x1="16" y1="-10" x2="12" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="12" y1="-20" x2="8"  y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="12" y1="-20" x2="16" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="20" y1="-10" x2="24" y2="-20" stroke="#6B3410" stroke-width="2"/>
-      <line x1="24" y1="-20" x2="20" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <line x1="24" y1="-20" x2="28" y2="-26" stroke="#6B3410" stroke-width="1.5"/>
-      <circle cx="24" cy="-4" r="2" fill="#1a0a00"/>
-      <!-- Rudolph's glowing nose -->
-      <circle id="rudolph-nose" cx="26" cy="-2" r="4" fill="#ff2200"/>
-    </g>
-
-    <!-- sleigh body -->
-    <g transform="translate(400,30)">
-      <!-- main body -->
-      <path d="M 0 50 Q 5 20 30 15 L 75 15 Q 85 15 90 25 L 92 50 Z" fill="#cc2200"/>
-      <path d="M 5 50 Q 10 25 32 20 L 73 20 Q 80 20 84 28 L 86 50 Z" fill="#ee3311"/>
-      <!-- runner -->
-      <path d="M -5 52 Q 20 62 95 58" stroke="#c8a96e" stroke-width="4" fill="none" stroke-linecap="round"/>
-      <path d="M -5 54 Q 20 64 95 60" stroke="#a07840" stroke-width="2" fill="none" stroke-linecap="round"/>
-      <!-- gold trim -->
-      <path d="M 30 15 L 75 15 Q 85 15 90 25" stroke="#f0c040" stroke-width="2" fill="none"/>
-      <!-- Santa -->
-      <circle cx="55" cy="8" r="10" fill="#ffe0c0"/>
-      <rect x="44" y="15" width="22" height="18" rx="4" fill="#cc2200"/>
-      <!-- hat -->
-      <rect x="48" y="-4" width="16" height="14" rx="3" fill="#cc2200"/>
-      <rect x="45" y="9"  width="22" height="4"  rx="2" fill="white"/>
-      <circle cx="56" cy="-5" r="3" fill="white"/>
-      <!-- beard -->
-      <ellipse cx="55" cy="14" rx="9" ry="5" fill="white"/>
-      <!-- sack -->
-      <ellipse cx="72" cy="14" rx="12" ry="14" fill="#8B4513"/>
-      <ellipse cx="72" cy="6"  rx="7"  ry="5"  fill="#6B3410"/>
-    </g>
-  </svg>
+  <img id="santa-sleigh" src="IMG_2218.gif" alt="Santa sleigh">
 
   <!-- NEON TEXT -->
   <div id="neon-text">I made this on my phone</div>
@@ -543,7 +441,7 @@
     let sleighActive = false;
 
     function launchSleigh() {
-      sleighX = -520;
+      sleighX = -620;
       sleighActive = true;
       const yPos = 8 + Math.random() * 35;
       sleigh.style.top = yPos + 'vh';
