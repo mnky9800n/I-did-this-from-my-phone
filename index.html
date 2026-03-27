@@ -61,41 +61,7 @@
 
   <!-- NEDM CAT -->
   <div id="nedm-cat">
-    <svg id="cat-body" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <!-- ears -->
-      <polygon points="15,35 5,10 30,28" fill="#e8a87c"/>
-      <polygon points="85,35 95,10 70,28" fill="#e8a87c"/>
-      <polygon points="15,35 10,15 27,30" fill="#f7c5a0"/>
-      <polygon points="85,35 90,15 73,30" fill="#f7c5a0"/>
-      <!-- head -->
-      <ellipse cx="50" cy="55" rx="38" ry="35" fill="#e8a87c"/>
-      <!-- face markings -->
-      <ellipse cx="50" cy="55" rx="26" ry="22" fill="#f7c5a0"/>
-      <!-- eyes -->
-      <ellipse cx="36" cy="50" rx="7" ry="7" fill="white"/>
-      <ellipse cx="64" cy="50" rx="7" ry="7" fill="white"/>
-      <circle cx="37" cy="50" r="4" fill="#111"/>
-      <circle cx="65" cy="50" r="4" fill="#111"/>
-      <circle cx="38" cy="48" r="1.5" fill="white"/>
-      <circle cx="66" cy="48" r="1.5" fill="white"/>
-      <!-- pupils glow red when shooting -->
-      <circle id="laser-glow-l" cx="37" cy="50" r="3" fill="red" opacity="0"/>
-      <circle id="laser-glow-r" cx="65" cy="50" r="3" fill="red" opacity="0"/>
-      <!-- nose -->
-      <polygon points="50,60 46,65 54,65" fill="#e57"/>
-      <!-- mouth -->
-      <path d="M 44 67 Q 50 72 56 67" stroke="#c45" stroke-width="1.5" fill="none"/>
-      <!-- whiskers left -->
-      <line x1="12" y1="58" x2="38" y2="62" stroke="#888" stroke-width="1"/>
-      <line x1="12" y1="64" x2="38" y2="65" stroke="#888" stroke-width="1"/>
-      <!-- whiskers right -->
-      <line x1="88" y1="58" x2="62" y2="62" stroke="#888" stroke-width="1"/>
-      <line x1="88" y1="64" x2="62" y2="65" stroke="#888" stroke-width="1"/>
-      <!-- stripes -->
-      <line x1="30" y1="32" x2="25" y2="22" stroke="#d4956a" stroke-width="2"/>
-      <line x1="50" y1="28" x2="50" y2="18" stroke="#d4956a" stroke-width="2"/>
-      <line x1="70" y1="32" x2="75" y2="22" stroke="#d4956a" stroke-width="2"/>
-    </svg>
+    <img id="cat-body" src="IMG_2209.png" alt="nedm cat" style="width:100%;height:100%;object-fit:contain;">
   </div>
 
   <script>
@@ -190,10 +156,10 @@
         old.el.remove();
       }
 
-      // shoot from each eye
+      // shoot from each eye (positions relative to cat center, tuned for photo)
       const eyeOffsets = [
-        { dx: 37 - 50, dy: 50 - 50 },  // left eye relative to cat center
-        { dx: 65 - 50, dy: 50 - 50 }   // right eye relative to cat center
+        { dx: -14, dy: -6 },  // left eye
+        { dx:  14, dy: -6 }   // right eye
       ];
 
       for (const eye of eyeOffsets) {
@@ -214,13 +180,9 @@
         lasers.push({ el, life: 18 });
       }
 
-      // Flash pupils
-      document.getElementById('laser-glow-l').setAttribute('opacity', '0.9');
-      document.getElementById('laser-glow-r').setAttribute('opacity', '0.9');
-      setTimeout(() => {
-        document.getElementById('laser-glow-l').setAttribute('opacity', '0');
-        document.getElementById('laser-glow-r').setAttribute('opacity', '0');
-      }, 80);
+      // Flash the cat red briefly
+      cat.style.filter = 'drop-shadow(0 0 8px red) brightness(1.4)';
+      setTimeout(() => { cat.style.filter = ''; }, 80);
     }
 
     let laserTick = 0;
