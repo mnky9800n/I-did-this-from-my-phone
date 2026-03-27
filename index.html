@@ -42,6 +42,18 @@
       animation: cat-spin 2s linear infinite;
     }
 
+    /* DAVID DUCHOVNY */
+    #duchovny {
+      position: fixed;
+      bottom: 0;
+      right: 120px;
+      height: 55vh;
+      z-index: 5;
+      pointer-events: none;
+      filter: drop-shadow(-4px 0 12px rgba(0,180,255,0.6));
+      image-rendering: auto;
+    }
+
     /* LASERS */
     .laser {
       position: fixed;
@@ -58,6 +70,9 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- DAVID DUCHOVNY -->
+  <img id="duchovny" src="IMG_2211.png" alt="David Duchovny">
 
   <!-- NEDM CAT -->
   <div id="nedm-cat">
