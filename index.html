@@ -160,15 +160,6 @@
       opacity: 0;
     }
 
-    /* SANTA SLEIGH */
-    #santa-sleigh {
-      position: fixed;
-      z-index: 4;
-      pointer-events: none;
-      filter: drop-shadow(0 0 6px rgba(255,200,100,0.4));
-      transform: scaleX(-1);
-    }
-
     /* NEON TEXT */
     @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
 
@@ -310,8 +301,6 @@
   </svg>
 
   <!-- SANTA SLEIGH -->
-  <img id="santa-sleigh" src="IMG_2218.gif" alt="Santa sleigh">
-
   <!-- NEON TEXT -->
   <div id="neon-text">I made this on my phone</div>
 
@@ -432,42 +421,6 @@
 
     initStars();
     loop();
-
-    // --- SANTA SLEIGH ---
-    const sleigh = document.getElementById('santa-sleigh');
-    let sleighX = 0;
-    let sleighW = 400;
-    let sleighSpeed = 3.5;
-    let sleighActive = false;
-
-    function launchSleigh() {
-      // randomise size: small (far), medium, large (close)
-      sleighW = 180 + Math.random() * 480; // 180–660px
-      sleighSpeed = 2 + (sleighW / 660) * 4; // faster when bigger/closer
-      sleigh.style.width = sleighW + 'px';
-
-      // start off the right edge
-      sleighX = window.innerWidth + 20;
-      sleighActive = true;
-
-      const yPos = 5 + Math.random() * 40;
-      sleigh.style.top = yPos + 'vh';
-      sleigh.style.left = sleighX + 'px';
-    }
-
-    function updateSleigh() {
-      if (sleighActive) {
-        sleighX -= sleighSpeed;
-        sleigh.style.left = sleighX + 'px';
-        if (sleighX < -(sleighW + 20)) {
-          sleighActive = false;
-          setTimeout(launchSleigh, 15000 + Math.random() * 15000);
-        }
-      }
-    }
-
-    // first pass after 4 seconds
-    setTimeout(launchSleigh, 4000);
 
     // --- UFO ---
     const ufo      = document.getElementById('ufo');
@@ -708,7 +661,6 @@
       laserTick++;
       if (laserTick % 40 === 0) spawnLaser();
 
-      updateSleigh();
       updateUFO();
       updateStar();
 
