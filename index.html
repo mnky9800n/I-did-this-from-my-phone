@@ -91,10 +91,21 @@
       box-shadow: 10px 10px 0 6px white, 20px 20px 0 3px white;
     }
 
+    /* LOFI GIRL */
+    #lofi-girl {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      height: 28vh;
+      z-index: 6;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px rgba(255, 180, 100, 0.4));
+    }
+
     /* RAINY CITY LABS */
     #rainy-city {
       position: fixed;
-      bottom: 14px;
+      bottom: calc(28vh + 10px);
       left: 18px;
       z-index: 20;
       color: rgba(180, 220, 255, 0.7);
@@ -126,6 +137,9 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- LOFI GIRL -->
+  <img id="lofi-girl" src="IMG_2214.png" alt="Lofi Girl">
 
   <!-- RAINY CITY LABS -->
   <div id="rainy-city">a rainy-city-labs project</div>
