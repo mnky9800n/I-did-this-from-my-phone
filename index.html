@@ -91,6 +91,46 @@
       box-shadow: 10px 10px 0 6px white, 20px 20px 0 3px white;
     }
 
+    /* NEON TEXT */
+    #neon-text {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 20;
+      font-family: 'Courier New', monospace;
+      font-size: clamp(16px, 3vw, 42px);
+      font-weight: bold;
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+      color: #fff;
+      text-shadow:
+        0 0 5px #fff,
+        0 0 10px #fff,
+        0 0 20px #ff00de,
+        0 0 40px #ff00de,
+        0 0 80px #ff00de,
+        0 0 90px #ff00de;
+      animation: neon-flicker 4s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes neon-flicker {
+      0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+        text-shadow:
+          0 0 5px #fff,
+          0 0 10px #fff,
+          0 0 20px #ff00de,
+          0 0 40px #ff00de,
+          0 0 80px #ff00de;
+        opacity: 1;
+      }
+      20%, 24%, 55% {
+        text-shadow: none;
+        opacity: 0.6;
+      }
+    }
+
     /* LOFI GIRL */
     #lofi-girl {
       position: fixed;
@@ -137,6 +177,9 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- NEON TEXT -->
+  <div id="neon-text">I made this on my phone</div>
 
   <!-- LOFI GIRL -->
   <img id="lofi-girl" src="IMG_2214.png" alt="Lofi Girl">
