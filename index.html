@@ -90,37 +90,39 @@
     #duchovny-wrap {
       position: fixed;
       bottom: 0;
-      left: 120px;
-      height: 55vh;
+      left: 2vw;
+      height: clamp(160px, 50vh, 55vh);
       z-index: 5;
       pointer-events: none;
     }
 
     #duchovny {
       height: 100%;
+      width: auto;
       filter: drop-shadow(-4px 0 12px rgba(0,180,255,0.6));
     }
 
     #thought-bubble {
       position: absolute;
-      top: 2%;
+      top: 5%;
       left: 100%;
-      margin-left: -10px;
+      margin-left: 8px;
       background: white;
       color: #222;
       font-family: 'Comic Sans MS', cursive, sans-serif;
-      font-size: clamp(10px, 1.4vw, 16px);
+      font-size: clamp(9px, 1.2vw, 15px);
       font-weight: bold;
-      padding: 10px 14px;
+      padding: 8px 12px;
       border-radius: 50%;
-      width: clamp(100px, 14vw, 160px);
-      height: clamp(60px, 8vw, 100px);
+      width: clamp(80px, 12vw, 150px);
+      height: clamp(50px, 7vw, 90px);
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
       box-shadow: 0 0 0 3px #ddd;
       animation: thought-float 3s ease-in-out infinite;
+      white-space: normal;
     }
 
     /* thought bubble tail dots */
@@ -128,11 +130,11 @@
       content: '';
       position: absolute;
       bottom: -18px;
-      left: 18px;
+      left: 14px;
       width: 12px; height: 12px;
       background: white;
       border-radius: 50%;
-      box-shadow: 10px 10px 0 6px white, 20px 20px 0 3px white;
+      box-shadow: -8px 10px 0 5px white, -14px 20px 0 3px white;
     }
 
     /* UFO */
@@ -243,7 +245,8 @@
       position: fixed;
       bottom: 0;
       left: 0;
-      height: 28vh;
+      height: clamp(80px, 22vh, 240px);
+      width: auto;
       z-index: 6;
       pointer-events: none;
       filter: drop-shadow(0 0 10px rgba(255, 180, 100, 0.4));
@@ -252,8 +255,8 @@
     /* RAINY CITY LABS */
     #rainy-city {
       position: fixed;
-      bottom: calc(28vh + 10px);
-      left: 18px;
+      bottom: calc(clamp(80px, 22vh, 240px) + 8px);
+      left: 1vw;
       z-index: 20;
       color: rgba(180, 220, 255, 0.7);
       font-family: 'Courier New', monospace;
