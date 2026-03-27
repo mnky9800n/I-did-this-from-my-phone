@@ -91,6 +91,20 @@
       box-shadow: 10px 10px 0 6px white, 20px 20px 0 3px white;
     }
 
+    /* RAINY CITY LABS */
+    #rainy-city {
+      position: fixed;
+      bottom: 14px;
+      left: 18px;
+      z-index: 20;
+      color: rgba(180, 220, 255, 0.7);
+      font-family: 'Courier New', monospace;
+      font-size: clamp(10px, 1.2vw, 14px);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 8px rgba(100, 180, 255, 0.8);
+      pointer-events: none;
+    }
+
     @keyframes thought-float {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-6px); }
@@ -112,6 +126,9 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- RAINY CITY LABS -->
+  <div id="rainy-city">a rainy-city-labs project</div>
 
   <!-- DAVID DUCHOVNY -->
   <div id="duchovny-wrap">
