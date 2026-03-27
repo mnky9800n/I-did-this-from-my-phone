@@ -42,6 +42,50 @@
       animation: cat-spin 2s linear infinite;
     }
 
+    /* GIF CHARACTERS */
+    #yelling-cat {
+      position: fixed;
+      bottom: 38vh;
+      left: 50%;
+      transform: translateX(-50%);
+      height: clamp(80px, 14vh, 160px);
+      z-index: 6;
+      pointer-events: none;
+      filter: drop-shadow(0 0 8px rgba(255,100,100,0.5));
+      animation: yell-bounce 0.4s ease-in-out infinite alternate;
+    }
+
+    @keyframes yell-bounce {
+      from { transform: translateX(-50%) scaleY(1); }
+      to   { transform: translateX(-50%) scaleY(1.06); }
+    }
+
+    #judgy-cat {
+      position: fixed;
+      top: 28vh;
+      right: 18px;
+      height: clamp(80px, 13vh, 140px);
+      z-index: 6;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px rgba(80,80,255,0.4));
+    }
+
+    #tux {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      height: clamp(80px, 16vh, 180px);
+      z-index: 6;
+      pointer-events: none;
+      filter: drop-shadow(0 0 10px rgba(255,50,50,0.5));
+      animation: tux-sway 2.5s ease-in-out infinite;
+    }
+
+    @keyframes tux-sway {
+      0%, 100% { transform: rotate(-3deg); }
+      50%       { transform: rotate(3deg); }
+    }
+
     /* DAVID DUCHOVNY */
     #duchovny-wrap {
       position: fixed;
@@ -396,6 +440,11 @@
 
   <!-- NEON TEXT -->
   <div id="neon-text">I made this on my phone</div>
+
+  <!-- GIF CHARACTERS -->
+  <img id="yelling-cat" src="IMG_2215.gif" alt="yelling cat">
+  <img id="judgy-cat"   src="IMG_2216.gif" alt="judgy black cat">
+  <img id="tux"         src="IMG_2217.gif" alt="Tux">
 
   <!-- LOFI GIRL -->
   <img id="lofi-girl" src="IMG_2214.png" alt="Lofi Girl">
