@@ -104,37 +104,12 @@
 
     #thought-bubble {
       position: absolute;
-      top: 5%;
+      top: 4%;
       left: 100%;
-      margin-left: 8px;
-      background: white;
-      color: #222;
-      font-family: 'Comic Sans MS', cursive, sans-serif;
-      font-size: clamp(9px, 1.2vw, 15px);
-      font-weight: bold;
-      padding: 8px 12px;
-      border-radius: 50%;
-      width: clamp(80px, 12vw, 150px);
-      height: clamp(50px, 7vw, 90px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      box-shadow: 0 0 0 3px #ddd;
+      margin-left: 6px;
+      width: clamp(130px, 16vw, 200px);
       animation: thought-float 3s ease-in-out infinite;
-      white-space: normal;
-    }
-
-    /* thought bubble tail dots */
-    #thought-bubble::after {
-      content: '';
-      position: absolute;
-      bottom: -18px;
-      left: 14px;
-      width: 12px; height: 12px;
-      background: white;
-      border-radius: 50%;
-      box-shadow: -8px 10px 0 5px white, -14px 20px 0 3px white;
+      overflow: visible;
     }
 
     /* UFO */
@@ -353,7 +328,29 @@
 
   <!-- DAVID DUCHOVNY -->
   <div id="duchovny-wrap">
-    <div id="thought-bubble">I miss Scully</div>
+    <svg id="thought-bubble" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+      <!-- connecting dots from Mulder's head -->
+      <circle cx="14" cy="132" r="4"  fill="white"/>
+      <circle cx="22" cy="120" r="6"  fill="white"/>
+      <circle cx="34" cy="107" r="8"  fill="white"/>
+      <!-- cloud bumps -->
+      <circle cx="62"  cy="72" r="28" fill="white"/>
+      <circle cx="95"  cy="58" r="34" fill="white"/>
+      <circle cx="133" cy="60" r="30" fill="white"/>
+      <circle cx="163" cy="74" r="24" fill="white"/>
+      <!-- cloud base fill -->
+      <rect x="50" y="72" width="130" height="48" fill="white"/>
+      <!-- bottom round -->
+      <ellipse cx="115" cy="108" rx="65" ry="20" fill="white"/>
+      <!-- text -->
+      <text x="112" y="88"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-family="'Comic Sans MS', 'Comic Sans', cursive"
+        font-size="17"
+        font-weight="bold"
+        fill="#111">I miss Scully</text>
+    </svg>
     <img id="duchovny" src="IMG_2211.png" alt="David Duchovny">
   </div>
 
