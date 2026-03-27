@@ -91,6 +91,33 @@
       box-shadow: 10px 10px 0 6px white, 20px 20px 0 3px white;
     }
 
+    /* UFO */
+    #ufo {
+      position: fixed;
+      width: 120px;
+      z-index: 8;
+      pointer-events: none;
+      display: none;
+    }
+
+    @keyframes ufo-glow {
+      0%, 100% { filter: drop-shadow(0 0 8px #00ff88) drop-shadow(0 0 20px #00cc66); }
+      50%       { filter: drop-shadow(0 0 16px #00ffaa) drop-shadow(0 0 40px #00ff88); }
+    }
+
+    #ufo.active { display: block; animation: ufo-glow 1s ease-in-out infinite; }
+
+    #ufo-beam {
+      position: fixed;
+      width: 6px;
+      background: linear-gradient(to bottom, rgba(0,255,100,0.9), rgba(0,255,100,0));
+      z-index: 7;
+      pointer-events: none;
+      display: none;
+      border-radius: 3px;
+      box-shadow: 0 0 10px 3px rgba(0,255,100,0.6);
+    }
+
     /* SANTA SLEIGH */
     #santa-sleigh {
       position: fixed;
@@ -197,6 +224,33 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- UFO -->
+  <div id="ufo-beam"></div>
+  <svg id="ufo" viewBox="0 0 120 60" xmlns="http://www.w3.org/2000/svg">
+    <!-- saucer shadow/bottom -->
+    <ellipse cx="60" cy="42" rx="52" ry="10" fill="#1a2a1a" opacity="0.5"/>
+    <!-- main disc -->
+    <ellipse cx="60" cy="38" rx="52" ry="12" fill="#445544"/>
+    <ellipse cx="60" cy="36" rx="52" ry="12" fill="#556655"/>
+    <!-- rim lights -->
+    <circle cx="20" cy="36" r="4" fill="#00ff88" opacity="0.9"/>
+    <circle cx="36" cy="40" r="4" fill="#ffee00" opacity="0.9"/>
+    <circle cx="52" cy="42" r="4" fill="#00ff88" opacity="0.9"/>
+    <circle cx="68" cy="42" r="4" fill="#ffee00" opacity="0.9"/>
+    <circle cx="84" cy="40" r="4" fill="#00ff88" opacity="0.9"/>
+    <circle cx="100" cy="36" r="4" fill="#ffee00" opacity="0.9"/>
+    <!-- dome -->
+    <ellipse cx="60" cy="28" rx="28" ry="18" fill="#334433"/>
+    <ellipse cx="60" cy="26" rx="26" ry="16" fill="#2a5c3a"/>
+    <!-- dome highlight -->
+    <ellipse cx="52" cy="20" rx="10" ry="6" fill="rgba(100,255,150,0.25)"/>
+    <!-- alien inside dome -->
+    <circle cx="60" cy="24" r="8" fill="#88cc44"/>
+    <circle cx="57" cy="21" r="2" fill="#000"/>
+    <circle cx="63" cy="21" r="2" fill="#000"/>
+    <path d="M 56 27 Q 60 30 64 27" stroke="#000" stroke-width="1" fill="none"/>
+  </svg>
 
   <!-- SANTA SLEIGH -->
   <svg id="santa-sleigh" viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg">
@@ -421,6 +475,96 @@
     // first pass after 4 seconds
     setTimeout(launchSleigh, 4000);
 
+    // --- UFO ---
+    const ufo      = document.getElementById('ufo');
+    const ufoBeam  = document.getElementById('ufo-beam');
+    const UFO_W    = 120;
+    const UFO_H    = 60;
+    let ufoX = -200, ufoY = -200;
+    let ufoState   = 'idle'; // idle | approach | shoot | flee
+    let ufoTimer   = 0;
+    let ufoShootFrames = 0;
+
+    function startUFO() {
+      // spawn from a random edge
+      const side = Math.floor(Math.random() * 4);
+      if (side === 0) { ufoX = Math.random() * window.innerWidth;  ufoY = -UFO_H; }
+      else if (side === 1) { ufoX = window.innerWidth;              ufoY = Math.random() * window.innerHeight * 0.6; }
+      else if (side === 2) { ufoX = Math.random() * window.innerWidth;  ufoY = -UFO_H; }
+      else                 { ufoX = -UFO_W;                         ufoY = Math.random() * window.innerHeight * 0.6; }
+
+      ufoState = 'approach';
+      ufo.classList.add('active');
+    }
+
+    function updateUFO() {
+      if (ufoState === 'idle') return;
+
+      const catCX = catX + CAT_SIZE / 2;
+      const catCY = catY + CAT_SIZE / 2;
+      const ufoCX = ufoX + UFO_W / 2;
+      const ufoCY = ufoY + UFO_H / 2;
+      const dx = catCX - ufoCX;
+      const dy = catCY - ufoCY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (ufoState === 'approach') {
+        // move toward cat
+        const speed = 2.8;
+        ufoX += (dx / dist) * speed;
+        ufoY += (dy / dist) * speed;
+        ufo.style.left = ufoX + 'px';
+        ufo.style.top  = ufoY + 'px';
+
+        // close enough to shoot
+        if (dist < 220) {
+          ufoState = 'shoot';
+          ufoShootFrames = 90;
+        }
+      }
+
+      else if (ufoState === 'shoot') {
+        // hover in place, show beam
+        ufoBeam.style.display = 'block';
+        const beamX = ufoCX - 3;
+        const beamY = ufoY + UFO_H - 4;
+        const beamH = Math.max(0, catCY - beamY);
+        ufoBeam.style.left   = beamX + 'px';
+        ufoBeam.style.top    = beamY + 'px';
+        ufoBeam.style.height = beamH + 'px';
+        // wobble slightly
+        ufoX += (Math.random() - 0.5) * 1.5;
+        ufoY += (Math.random() - 0.5) * 1.5;
+        ufo.style.left = ufoX + 'px';
+        ufo.style.top  = ufoY + 'px';
+
+        ufoShootFrames--;
+        if (ufoShootFrames <= 0) {
+          ufoBeam.style.display = 'none';
+          ufoState = 'flee';
+        }
+      }
+
+      else if (ufoState === 'flee') {
+        // bolt off-screen fast
+        ufoX -= 8;
+        ufoY -= 5;
+        ufo.style.left = ufoX + 'px';
+        ufo.style.top  = ufoY + 'px';
+
+        if (ufoX < -300 || ufoY < -300) {
+          ufoState = 'idle';
+          ufo.classList.remove('active');
+          ufoBeam.style.display = 'none';
+          // come back in 20–45 seconds
+          setTimeout(startUFO, 20000 + Math.random() * 25000);
+        }
+      }
+    }
+
+    // first visit after 8 seconds
+    setTimeout(startUFO, 8000);
+
     // --- NEDM CAT BOUNCE ---
     const cat = document.getElementById('nedm-cat');
     const CAT_SIZE = 100;
@@ -495,6 +639,7 @@
       if (laserTick % 40 === 0) spawnLaser();
 
       updateSleigh();
+      updateUFO();
 
       requestAnimationFrame(updateCat);
     }
