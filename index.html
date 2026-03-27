@@ -118,6 +118,27 @@
       box-shadow: 0 0 10px 3px rgba(0,255,100,0.6);
     }
 
+    /* CANDY STAR */
+    #candy-star {
+      position: fixed;
+      width: 70px;
+      height: 70px;
+      z-index: 11;
+      pointer-events: none;
+      display: none;
+    }
+    #candy-star.active { display: block; }
+
+    .star-trail {
+      position: fixed;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      z-index: 10;
+      pointer-events: none;
+      opacity: 0;
+    }
+
     /* SANTA SLEIGH */
     #santa-sleigh {
       position: fixed;
@@ -224,6 +245,25 @@
 <body>
 
   <canvas id="starfield"></canvas>
+
+  <!-- CANDY STAR -->
+  <svg id="candy-star" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <!-- glow -->
+    <circle cx="50" cy="50" r="38" fill="rgba(255,240,50,0.18)"/>
+    <!-- star shape -->
+    <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+      fill="#ffe033" stroke="#ffaa00" stroke-width="2"/>
+    <!-- candy stripes -->
+    <polygon points="50,5 61,35 95,35 68,57 79,91 50,70 21,91 32,57 5,35 39,35"
+      fill="url(#candy-stripe)" opacity="0.55"/>
+    <defs>
+      <pattern id="candy-stripe" patternUnits="userSpaceOnUse" width="12" height="12" patternTransform="rotate(45)">
+        <rect width="6" height="12" fill="#ff6ec7"/>
+      </pattern>
+    </defs>
+    <!-- shine -->
+    <ellipse cx="38" cy="32" rx="9" ry="5" fill="rgba(255,255,255,0.5)" transform="rotate(-20,38,32)"/>
+  </svg>
 
   <!-- UFO -->
   <div id="ufo-beam"></div>
@@ -565,6 +605,82 @@
     // first visit after 8 seconds
     setTimeout(startUFO, 8000);
 
+    // --- CANDY STAR ---
+    const candyStar = document.getElementById('candy-star');
+    const STAR_SIZE = 70;
+    const RAINBOW = ['#ff0000','#ff7700','#ffee00','#00cc44','#0088ff','#8800ff','#ff00cc'];
+    let starX, starY, starVX, starVY, starActive = false;
+    const trailPool = [];
+    const TRAIL_COUNT = 18;
+
+    for (let i = 0; i < TRAIL_COUNT; i++) {
+      const el = document.createElement('div');
+      el.className = 'star-trail';
+      document.body.appendChild(el);
+      trailPool.push({ el, x: -999, y: -999, life: 0, maxLife: 0 });
+    }
+
+    let trailIdx = 0;
+
+    function launchStar() {
+      // always flies left-to-right at a random vertical position
+      starX  = -STAR_SIZE - 10;
+      starY  = 10 + Math.random() * 70;  // 10–80 vh
+      starY  = starY / 100 * window.innerHeight;
+      starVX = 5 + Math.random() * 4;
+      starVY = (Math.random() - 0.5) * 2;
+      starActive = true;
+      candyStar.classList.add('active');
+    }
+
+    let starSpinAngle = 0;
+
+    function updateStar() {
+      if (!starActive) return;
+
+      starX += starVX;
+      starY += starVY;
+      starSpinAngle += 4;
+
+      candyStar.style.left      = starX + 'px';
+      candyStar.style.top       = starY + 'px';
+      candyStar.style.transform = `rotate(${starSpinAngle}deg)`;
+
+      // spawn trail bubble
+      const t = trailPool[trailIdx % TRAIL_COUNT];
+      trailIdx++;
+      t.x       = starX + STAR_SIZE / 2 - 9;
+      t.y       = starY + STAR_SIZE / 2 - 9;
+      t.life    = 30;
+      t.maxLife = 30;
+      t.el.style.background = RAINBOW[trailIdx % RAINBOW.length];
+      t.el.style.boxShadow  = `0 0 8px 3px ${RAINBOW[trailIdx % RAINBOW.length]}`;
+
+      // fade all trail bubbles
+      for (const t of trailPool) {
+        if (t.life > 0) {
+          t.life--;
+          const frac = t.life / t.maxLife;
+          t.el.style.left    = t.x + 'px';
+          t.el.style.top     = t.y + 'px';
+          t.el.style.opacity = frac;
+          t.el.style.transform = `scale(${0.4 + frac * 0.8})`;
+        } else {
+          t.el.style.opacity = 0;
+        }
+      }
+
+      if (starX > window.innerWidth + 100) {
+        starActive = false;
+        candyStar.classList.remove('active');
+        for (const t of trailPool) { t.life = 0; t.el.style.opacity = 0; }
+        setTimeout(launchStar, 12000 + Math.random() * 18000);
+      }
+    }
+
+    // first fly-by after 12 seconds
+    setTimeout(launchStar, 12000);
+
     // --- NEDM CAT BOUNCE ---
     const cat = document.getElementById('nedm-cat');
     const CAT_SIZE = 100;
@@ -640,6 +756,7 @@
 
       updateSleigh();
       updateUFO();
+      updateStar();
 
       requestAnimationFrame(updateCat);
     }
