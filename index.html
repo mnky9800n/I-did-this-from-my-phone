@@ -369,9 +369,6 @@
     window.addEventListener('resize', () => {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
-      imgData = ctx.createImageData(W, H);
-      pixels = imgData.data;
-      buf32 = new Uint32Array(imgData.data.buffer);
       initStars();
     });
 
@@ -392,23 +389,10 @@
       }
     }
 
-    // Pre-create ImageData for pixel-level starfield (much faster than 300 stroke calls)
-    let imgData = ctx.createImageData(W, H);
-    let pixels = imgData.data;
-    let buf32 = new Uint32Array(imgData.data.buffer);
-
     function drawStars() {
-      // Fade existing pixels using 32-bit ops (4x fewer iterations)
-      const len32 = buf32.length;
-      for (let j = 0; j < len32; j++) {
-        const v = buf32[j];
-        // Extract RGBA channels, multiply by ~0.82 (210/256), reassemble
-        // Layout is ABGR on little-endian
-        const r = ((v & 0xFF) * 210) >>> 8;
-        const g = (((v >>> 8) & 0xFF) * 210) >>> 8;
-        const b = (((v >>> 16) & 0xFF) * 210) >>> 8;
-        buf32[j] = 0xFF000000 | (b << 16) | (g << 8) | r;
-      }
+      // Fade by drawing a semi-transparent black rect (GPU-accelerated)
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.fillRect(0, 0, W, H);
 
       const cx = W * 0.5, cy = H * 0.5;
       const speed = 12;
@@ -426,31 +410,18 @@
         }
 
         const invZ = 1 / starZ_[i];
-        const sx = (starX_[i] * invZ * W + cx) | 0;
-        const sy = (starY_[i] * invZ * H + cy) | 0;
+        const sx = starX_[i] * invZ * W + cx;
+        const sy = starY_[i] * invZ * H + cy;
 
         if (sx < 0 || sx >= W || sy < 0 || sy >= H) continue;
 
         const ratio = 1 - starZ_[i] * invW;
+        const r = Math.max(ratio * 2.5, 0.5);
         const b = (ratio * 255) | 0;
 
-        // Draw a pixel cluster (size based on distance)
-        const size = (ratio * 2.5) | 0;
-        const r = Math.max(size, 1);
-        const color32 = 0xFF000000 | (0xFF << 16) | (b << 8) | b; // ABGR: alpha=FF, B=FF, G=b, R=b
-        for (let dy = -r; dy <= r; dy++) {
-          const py = sy + dy;
-          if (py < 0 || py >= H) continue;
-          const rowOff = py * W;
-          for (let dx = -r; dx <= r; dx++) {
-            const px = sx + dx;
-            if (px < 0 || px >= W) continue;
-            buf32[rowOff + px] = color32;
-          }
-        }
+        ctx.fillStyle = `rgb(${b},${b},255)`;
+        ctx.fillRect(sx - r, sy - r, r * 2, r * 2);
       }
-
-      ctx.putImageData(imgData, 0, 0);
     }
 
     initStars();
@@ -655,21 +626,25 @@
 
     const eyeOffsets = [{ dx: -14, dy: -6 }, { dx: 14, dy: -6 }];
 
-    // Get positions of targetable scene objects
-    function getSceneTargets() {
-      const targets = [];
-      const yc = document.getElementById('yelling-cat');
-      if (yc) { const r = yc.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
-      const jc = document.getElementById('judgy-cat');
-      if (jc) { const r = jc.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
-      const tx = document.getElementById('tux');
-      if (tx) { const r = tx.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
-      const lf = document.getElementById('lofi-girl');
-      if (lf) { const r = lf.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+    // Cache static element positions (they don't move)
+    let cachedTargets = null;
+    function cacheStaticTargets() {
+      cachedTargets = [];
+      const ids = ['yelling-cat', 'judgy-cat', 'tux', 'lofi-girl'];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el) { const r = el.getBoundingClientRect(); cachedTargets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      }
       const dw = document.getElementById('duchovny-wrap');
-      if (dw) { const r = dw.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 3 }); }
-      // Liu Kang only if active on screen
-      if (lkActive) { const r = liuKang.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      if (dw) { const r = dw.getBoundingClientRect(); cachedTargets.push({ x: r.left + r.width / 2, y: r.top + r.height / 3 }); }
+    }
+    // Cache after layout settles, and on resize
+    setTimeout(cacheStaticTargets, 500);
+    window.addEventListener('resize', () => { cachedTargets = null; setTimeout(cacheStaticTargets, 200); });
+
+    function getSceneTargets() {
+      const targets = cachedTargets ? cachedTargets.slice() : [];
+      if (lkActive) { targets.push({ x: lkX + 200, y: lkY + 100 }); }
       return targets;
     }
 
