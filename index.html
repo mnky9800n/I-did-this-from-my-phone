@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>I Made This On My Phone</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Dancing+Script:wght@700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
@@ -92,6 +93,7 @@
       height: 85vmin;
       z-index: 5;
       pointer-events: none;
+      overflow: visible;
     }
 
     #duchovny {
@@ -101,11 +103,11 @@
     }
 
     #thought-bubble {
-      position: absolute;
-      top: 4%;
-      left: 100%;
-      margin-left: 6px;
-      width: 30vmin;
+      position: fixed;
+      bottom: 72vmin;
+      left: 1vw;
+      width: 24vmin;
+      z-index: 5;
       animation: thought-float 3s ease-in-out infinite;
       overflow: visible;
     }
@@ -166,7 +168,6 @@
     }
 
     /* NEON TEXT */
-    @import url('https://fonts.googleapis.com/css2?family=Bungee&display=swap');
 
     #neon-text {
       position: fixed;
@@ -174,16 +175,22 @@
       left: 50%;
       transform: translateX(-50%);
       z-index: 20;
-      font-family: 'Bungee', 'Arial Black', sans-serif;
-      font-size: clamp(28px, 7vw, 80px);
-      font-weight: 900;
-      letter-spacing: 0.12em;
+      font-family: 'Comic Sans MS', 'Comic Sans', cursive;
+      font-size: clamp(18px, 4.5vw, 56px);
+      font-weight: 400;
+      letter-spacing: 0.05em;
       white-space: nowrap;
+      max-width: 96vw;
+      text-align: center;
       color: #fff;
       text-shadow:
         0 0 7px #fff,
-        0 0 30px #ff00de,
-        0 0 80px #ff00de;
+        0 0 20px #fff,
+        0 0 40px #ff00de,
+        0 0 80px #ff00de,
+        0 0 120px #ff00de,
+        0 0 160px #ff40ef,
+        0 0 220px #ff40ef;
       animation: neon-flicker 4s infinite;
       pointer-events: none;
     }
@@ -228,13 +235,25 @@
       50%       { transform: translateY(-6px); }
     }
 
+    /* LIU KANG */
+    #liu-kang {
+      position: fixed;
+      left: 0; top: 0;
+      height: 40vmin;
+      z-index: 6;
+      pointer-events: none;
+      display: none;
+      will-change: transform;
+    }
+    #liu-kang.active { display: block; }
+
     /* LASERS */
     .laser {
       position: fixed;
       left: 0; top: 0;
       height: 3px;
       background: linear-gradient(to right, red, orange, yellow);
-      z-index: 9;
+      z-index: 12;
       pointer-events: none;
       transform-origin: left center;
       border-radius: 2px;
@@ -300,6 +319,7 @@
   <img id="yelling-cat" src="IMG_2215.gif" alt="yelling cat">
   <img id="judgy-cat"   src="IMG_2216.gif" alt="judgy black cat">
   <img id="tux"         src="IMG_2217.gif" alt="Tux">
+  <img id="liu-kang"    src="2541402_906c4.gif" alt="Liu Kang bicycle kick">
 
   <!-- LOFI GIRL -->
   <img id="lofi-girl" src="IMG_2214.png" alt="Lofi Girl">
@@ -310,17 +330,15 @@
   <!-- DAVID DUCHOVNY -->
   <div id="duchovny-wrap">
     <svg id="thought-bubble" viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" overflow="visible">
-      <!-- connecting dots from Mulder's head -->
-      <circle cx="14" cy="132" r="4"  fill="white"/>
-      <circle cx="22" cy="120" r="6"  fill="white"/>
-      <circle cx="34" cy="107" r="8"  fill="white"/>
+      <!-- connecting dots trailing to Mulder's head (right side) -->
+      <circle cx="186" cy="132" r="4"  fill="white"/>
+      <circle cx="178" cy="120" r="6"  fill="white"/>
+      <circle cx="166" cy="107" r="8"  fill="white"/>
       <!-- cloud bumps -->
       <circle cx="62"  cy="72" r="28" fill="white"/>
       <circle cx="95"  cy="58" r="34" fill="white"/>
       <circle cx="133" cy="60" r="30" fill="white"/>
       <circle cx="163" cy="74" r="24" fill="white"/>
-      <!-- cloud base fill -->
-      <rect x="50" y="72" width="130" height="48" fill="white"/>
       <!-- bottom round -->
       <ellipse cx="115" cy="108" rx="65" ry="20" fill="white"/>
       <!-- text -->
@@ -516,7 +534,7 @@
 
     // --- CANDY STAR ---
     const candyStar = document.getElementById('candy-star');
-    const STAR_SIZE = 70;
+    function getStarSize() { return Math.min(window.innerWidth, window.innerHeight) * 0.15; }
     const RAINBOW = ['#ff0000','#ff7700','#ffee00','#00cc44','#0088ff','#8800ff','#ff00cc'];
     let starX, starY, starVX, starVY, starActive = false;
     const trailPool = [];
@@ -532,7 +550,7 @@
     let trailIdx = 0;
 
     function launchStar() {
-      starX  = -STAR_SIZE - 10;
+      starX  = -getStarSize() - 10;
       starY  = (10 + Math.random() * 70) / 100 * H;
       starVX = 5 + Math.random() * 4;
       starVY = (Math.random() - 0.5) * 2;
@@ -554,8 +572,10 @@
       // spawn trail bubble
       const t = trailPool[trailIdx % TRAIL_COUNT];
       trailIdx++;
-      t.x       = starX + STAR_SIZE * 0.5 - 9;
-      t.y       = starY + STAR_SIZE * 0.5 - 9;
+      const ss = getStarSize();
+      const trailR = Math.min(W, H) * 0.015;
+      t.x       = starX + ss * 0.5 - trailR;
+      t.y       = starY + ss * 0.5 - trailR;
       t.life    = 30;
       t.maxLife = 30;
       const color = RAINBOW[trailIdx % RAINBOW.length];
@@ -587,6 +607,32 @@
 
     setTimeout(launchStar, 12000);
 
+    // --- LIU KANG BICYCLE KICK ---
+    const liuKang = document.getElementById('liu-kang');
+    let lkX, lkY, lkActive = false;
+
+    function launchLiuKang() {
+      lkX = -400;
+      lkY = Math.random() * (H / 3);
+      lkActive = true;
+      liuKang.classList.add('active');
+    }
+
+    function updateLiuKang() {
+      if (!lkActive) return;
+      lkX += 3 + Math.random() * 1;
+      lkY += Math.sin(lkX * 0.02) * 1.5;
+      liuKang.style.transform = `translate3d(${lkX}px,${lkY}px,0) scaleX(-1)`;
+
+      if (lkX > W + 100) {
+        lkActive = false;
+        liuKang.classList.remove('active');
+        setTimeout(launchLiuKang, 18750 + Math.random() * 11250);
+      }
+    }
+
+    setTimeout(launchLiuKang, 11250);
+
     // --- NEDM CAT BOUNCE ---
     const cat = document.getElementById('nedm-cat');
     const CAT_SIZE = Math.min(W, H) * 0.21;
@@ -603,21 +649,59 @@
       el.className = 'laser';
       el.style.display = 'none';
       document.body.appendChild(el);
-      laserPool.push({ el, life: 0, active: false });
+      laserPool.push({ el, life: 0, active: false, targetX: 0, targetY: 0, eyeDx: 0, eyeDy: 0 });
     }
     let laserPoolIdx = 0;
 
     const eyeOffsets = [{ dx: -14, dy: -6 }, { dx: 14, dy: -6 }];
 
+    // Get positions of targetable scene objects
+    function getSceneTargets() {
+      const targets = [];
+      const yc = document.getElementById('yelling-cat');
+      if (yc) { const r = yc.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      const jc = document.getElementById('judgy-cat');
+      if (jc) { const r = jc.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      const tx = document.getElementById('tux');
+      if (tx) { const r = tx.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      const lf = document.getElementById('lofi-girl');
+      if (lf) { const r = lf.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      const dw = document.getElementById('duchovny-wrap');
+      if (dw) { const r = dw.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 3 }); }
+      // Liu Kang only if active on screen
+      if (lkActive) { const r = liuKang.getBoundingClientRect(); targets.push({ x: r.left + r.width / 2, y: r.top + r.height / 2 }); }
+      return targets;
+    }
+
+    function getLaserTarget() {
+      // Exclusively target UFO when it's active
+      if (ufoState !== 'idle') {
+        return { x: ufoX + UFO_W * 0.5, y: ufoY + UFO_H * 0.5 };
+      }
+      // Otherwise pick a random scene object
+      const targets = getSceneTargets();
+      if (targets.length === 0) return { x: catX + CAT_SIZE * 0.5 + catVX * 50, y: catY + CAT_SIZE * 0.5 + catVY * 50 };
+      return targets[Math.floor(Math.random() * targets.length)];
+    }
+
     function spawnLaser() {
+      const target = getLaserTarget();
+
       for (const eye of eyeOffsets) {
         const laser = laserPool[laserPoolIdx % MAX_LASER_POOL];
         laserPoolIdx++;
 
+        laser.eyeDx = eye.dx;
+        laser.eyeDy = eye.dy;
+        laser.targetX = target.x;
+        laser.targetY = target.y;
+
         const startX = catX + CAT_SIZE * 0.5 + eye.dx;
         const startY = catY + CAT_SIZE * 0.5 + eye.dy;
-        const angle  = Math.atan2(catVY, catVX) * (180 / Math.PI);
-        const length = 80 + Math.random() * 60;
+        const dx = target.x - startX;
+        const dy = target.y - startY;
+        const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+        const length = Math.min(Math.sqrt(dx * dx + dy * dy), 300);
 
         laser.el.style.width   = length + 'px';
         laser.el.style.transform = `translate3d(${startX}px,${startY}px,0) rotate(${angle}deg)`;
@@ -651,7 +735,7 @@
 
       cat.style.transform = `translate3d(${catX}px,${catY}px,0)`;
 
-      // Lasers
+      // Lasers — update position to track with cat, fade out
       for (let i = 0; i < MAX_LASER_POOL; i++) {
         const laser = laserPool[i];
         if (!laser.active) continue;
@@ -660,6 +744,14 @@
           laser.active = false;
           laser.el.style.display = 'none';
         } else {
+          const sx = catX + CAT_SIZE * 0.5 + laser.eyeDx;
+          const sy = catY + CAT_SIZE * 0.5 + laser.eyeDy;
+          const dx = laser.targetX - sx;
+          const dy = laser.targetY - sy;
+          const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+          const length = Math.min(Math.sqrt(dx * dx + dy * dy), 300);
+          laser.el.style.width = length + 'px';
+          laser.el.style.transform = `translate3d(${sx}px,${sy}px,0) rotate(${angle}deg)`;
           laser.el.style.opacity = laser.life / 18;
         }
       }
@@ -667,9 +759,10 @@
       laserTick++;
       if (laserTick % 40 === 0) spawnLaser();
 
-      // UFO & Star
+      // UFO, Star & Liu Kang
       updateUFO();
       updateStar();
+      updateLiuKang();
 
       requestAnimationFrame(tick);
     }
