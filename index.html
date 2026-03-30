@@ -29,6 +29,7 @@
       height: 14vmin;
       z-index: 10;
       pointer-events: none;
+      will-change: transform;
     }
 
     @keyframes cat-spin {
@@ -115,10 +116,12 @@
     /* UFO */
     #ufo {
       position: fixed;
+      left: 0; top: 0;
       width: 16vmin;
       z-index: 8;
       pointer-events: none;
       display: none;
+      will-change: transform;
     }
 
     @keyframes ufo-glow {
@@ -130,6 +133,7 @@
 
     #ufo-beam {
       position: fixed;
+      left: 0; top: 0;
       width: 6px;
       background: linear-gradient(to bottom, rgba(0,255,100,0.9), rgba(0,255,100,0));
       z-index: 7;
@@ -137,27 +141,32 @@
       display: none;
       border-radius: 3px;
       box-shadow: 0 0 10px 3px rgba(0,255,100,0.6);
+      will-change: transform;
     }
 
     /* CANDY STAR */
     #candy-star {
       position: fixed;
+      left: 0; top: 0;
       width: 10vmin;
       height: 10vmin;
       z-index: 11;
       pointer-events: none;
       display: none;
+      will-change: transform;
     }
     #candy-star.active { display: block; }
 
     .star-trail {
       position: fixed;
+      left: 0; top: 0;
       width: 2vmin;
       height: 2vmin;
       border-radius: 50%;
       z-index: 10;
       pointer-events: none;
       opacity: 0;
+      will-change: transform, opacity;
     }
 
     /* NEON TEXT */
@@ -240,6 +249,7 @@
     /* LASERS */
     .laser {
       position: fixed;
+      left: 0; top: 0;
       height: 3px;
       background: linear-gradient(to right, red, orange, yellow);
       box-shadow: 0 0 6px 2px red;
@@ -247,6 +257,7 @@
       pointer-events: none;
       transform-origin: left center;
       border-radius: 2px;
+      will-change: transform, opacity;
     }
   </style>
 </head>
@@ -351,76 +362,75 @@
   <script>
     // --- STARFIELD ---
     const canvas = document.getElementById('starfield');
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: false });
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
 
     window.addEventListener('resize', () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
       initStars();
     });
 
     const NUM_STARS = 300;
-    let stars = [];
+    // Flat typed arrays for star data: x, y, z, pz per star
+    const starX_ = new Float32Array(NUM_STARS);
+    const starY_ = new Float32Array(NUM_STARS);
+    const starZ_ = new Float32Array(NUM_STARS);
+    const starPZ = new Float32Array(NUM_STARS);
 
     function initStars() {
-      stars = [];
+      const hw = W / 2, hh = H / 2;
       for (let i = 0; i < NUM_STARS; i++) {
-        stars.push({
-          x: Math.random() * canvas.width - canvas.width / 2,
-          y: Math.random() * canvas.height - canvas.height / 2,
-          z: Math.random() * canvas.width,
-          pz: 0
-        });
+        starX_[i] = Math.random() * W - hw;
+        starY_[i] = Math.random() * H - hh;
+        starZ_[i] = Math.random() * W;
+        starPZ[i] = 0;
       }
     }
 
     function drawStars() {
       ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillRect(0, 0, W, H);
 
-      const cx = canvas.width / 2;
-      const cy = canvas.height / 2;
+      const cx = W * 0.5, cy = H * 0.5;
       const speed = 12;
 
-      for (let star of stars) {
-        star.pz = star.z;
-        star.z -= speed;
+      // Batch all lines into a single path per brightness bucket (8 buckets)
+      ctx.lineCap = 'round';
+      for (let i = 0; i < NUM_STARS; i++) {
+        starPZ[i] = starZ_[i];
+        starZ_[i] -= speed;
 
-        if (star.z <= 0) {
-          star.x = Math.random() * canvas.width - cx;
-          star.y = Math.random() * canvas.height - cy;
-          star.z = canvas.width;
-          star.pz = star.z;
+        if (starZ_[i] <= 0) {
+          starX_[i] = Math.random() * W - cx;
+          starY_[i] = Math.random() * H - cy;
+          starZ_[i] = W;
+          starPZ[i] = starZ_[i];
         }
 
-        const sx = (star.x / star.z) * canvas.width + cx;
-        const sy = (star.y / star.z) * canvas.height + cy;
-        const px = (star.x / star.pz) * canvas.width + cx;
-        const py = (star.y / star.pz) * canvas.height + cy;
+        const invZ = 1 / starZ_[i];
+        const invPZ = 1 / starPZ[i];
+        const sx = starX_[i] * invZ * W + cx;
+        const sy = starY_[i] * invZ * H + cy;
+        const px = starX_[i] * invPZ * W + cx;
+        const py = starY_[i] * invPZ * H + cy;
 
-        const size = Math.max(0.5, (1 - star.z / canvas.width) * 3);
-        const brightness = Math.floor((1 - star.z / canvas.width) * 255);
-        const color = `rgb(${brightness},${brightness},255)`;
+        const ratio = 1 - starZ_[i] / W;
+        const size = ratio * 3;
+        const b = (ratio * 255) | 0;
 
         ctx.beginPath();
         ctx.moveTo(px, py);
         ctx.lineTo(sx, sy);
-        ctx.strokeStyle = color;
-        ctx.lineWidth = size;
+        ctx.strokeStyle = `rgb(${b},${b},255)`;
+        ctx.lineWidth = size < 0.5 ? 0.5 : size;
         ctx.stroke();
       }
     }
 
-    function loop() {
-      drawStars();
-      requestAnimationFrame(loop);
-    }
-
     initStars();
-    loop();
 
     // --- UFO ---
     const ufo      = document.getElementById('ufo');
@@ -428,17 +438,15 @@
     const UFO_W    = 120;
     const UFO_H    = 60;
     let ufoX = -200, ufoY = -200;
-    let ufoState   = 'idle'; // idle | approach | shoot | flee
-    let ufoTimer   = 0;
+    let ufoState   = 'idle';
     let ufoShootFrames = 0;
 
     function startUFO() {
-      // spawn from a random edge
       const side = Math.floor(Math.random() * 4);
-      if (side === 0) { ufoX = Math.random() * window.innerWidth;  ufoY = -UFO_H; }
-      else if (side === 1) { ufoX = window.innerWidth;              ufoY = Math.random() * window.innerHeight * 0.6; }
-      else if (side === 2) { ufoX = Math.random() * window.innerWidth;  ufoY = -UFO_H; }
-      else                 { ufoX = -UFO_W;                         ufoY = Math.random() * window.innerHeight * 0.6; }
+      if (side === 0)      { ufoX = Math.random() * W;  ufoY = -UFO_H; }
+      else if (side === 1) { ufoX = W;                   ufoY = Math.random() * H * 0.6; }
+      else if (side === 2) { ufoX = Math.random() * W;  ufoY = -UFO_H; }
+      else                 { ufoX = -UFO_W;              ufoY = Math.random() * H * 0.6; }
 
       ufoState = 'approach';
       ufo.classList.add('active');
@@ -447,23 +455,21 @@
     function updateUFO() {
       if (ufoState === 'idle') return;
 
-      const catCX = catX + CAT_SIZE / 2;
-      const catCY = catY + CAT_SIZE / 2;
-      const ufoCX = ufoX + UFO_W / 2;
-      const ufoCY = ufoY + UFO_H / 2;
+      const catCX = catX + CAT_SIZE * 0.5;
+      const catCY = catY + CAT_SIZE * 0.5;
+      const ufoCX = ufoX + UFO_W * 0.5;
+      const ufoCY = ufoY + UFO_H * 0.5;
       const dx = catCX - ufoCX;
       const dy = catCY - ufoCY;
       const dist = Math.sqrt(dx * dx + dy * dy);
 
       if (ufoState === 'approach') {
-        // move toward cat
         const speed = 2.8;
-        ufoX += (dx / dist) * speed;
-        ufoY += (dy / dist) * speed;
-        ufo.style.left = ufoX + 'px';
-        ufo.style.top  = ufoY + 'px';
+        const invDist = 1 / dist;
+        ufoX += dx * invDist * speed;
+        ufoY += dy * invDist * speed;
+        ufo.style.transform = `translate3d(${ufoX}px,${ufoY}px,0)`;
 
-        // close enough to shoot
         if (dist < 220) {
           ufoState = 'shoot';
           ufoShootFrames = 90;
@@ -471,45 +477,36 @@
       }
 
       else if (ufoState === 'shoot') {
-        // hover in place, show beam
         ufoBeam.style.display = 'block';
         const beamX = ufoCX - 3;
         const beamY = ufoY + UFO_H - 4;
         const beamH = Math.max(0, catCY - beamY);
-        ufoBeam.style.left   = beamX + 'px';
-        ufoBeam.style.top    = beamY + 'px';
+        ufoBeam.style.transform = `translate3d(${beamX}px,${beamY}px,0)`;
         ufoBeam.style.height = beamH + 'px';
-        // wobble slightly
         ufoX += (Math.random() - 0.5) * 1.5;
         ufoY += (Math.random() - 0.5) * 1.5;
-        ufo.style.left = ufoX + 'px';
-        ufo.style.top  = ufoY + 'px';
+        ufo.style.transform = `translate3d(${ufoX}px,${ufoY}px,0)`;
 
-        ufoShootFrames--;
-        if (ufoShootFrames <= 0) {
+        if (--ufoShootFrames <= 0) {
           ufoBeam.style.display = 'none';
           ufoState = 'flee';
         }
       }
 
       else if (ufoState === 'flee') {
-        // bolt off-screen fast
         ufoX -= 8;
         ufoY -= 5;
-        ufo.style.left = ufoX + 'px';
-        ufo.style.top  = ufoY + 'px';
+        ufo.style.transform = `translate3d(${ufoX}px,${ufoY}px,0)`;
 
         if (ufoX < -300 || ufoY < -300) {
           ufoState = 'idle';
           ufo.classList.remove('active');
           ufoBeam.style.display = 'none';
-          // come back in 20–45 seconds
           setTimeout(startUFO, 20000 + Math.random() * 25000);
         }
       }
     }
 
-    // first visit after 8 seconds
     setTimeout(startUFO, 8000);
 
     // --- CANDY STAR ---
@@ -530,10 +527,8 @@
     let trailIdx = 0;
 
     function launchStar() {
-      // always flies left-to-right at a random vertical position
       starX  = -STAR_SIZE - 10;
-      starY  = 10 + Math.random() * 70;  // 10–80 vh
-      starY  = starY / 100 * window.innerHeight;
+      starY  = (10 + Math.random() * 70) / 100 * H;
       starVX = 5 + Math.random() * 4;
       starVY = (Math.random() - 0.5) * 2;
       starActive = true;
@@ -549,124 +544,133 @@
       starY += starVY;
       starSpinAngle += 4;
 
-      candyStar.style.left      = starX + 'px';
-      candyStar.style.top       = starY + 'px';
-      candyStar.style.transform = `rotate(${starSpinAngle}deg)`;
+      candyStar.style.transform = `translate3d(${starX}px,${starY}px,0) rotate(${starSpinAngle}deg)`;
 
       // spawn trail bubble
       const t = trailPool[trailIdx % TRAIL_COUNT];
       trailIdx++;
-      t.x       = starX + STAR_SIZE / 2 - 9;
-      t.y       = starY + STAR_SIZE / 2 - 9;
+      t.x       = starX + STAR_SIZE * 0.5 - 9;
+      t.y       = starY + STAR_SIZE * 0.5 - 9;
       t.life    = 30;
       t.maxLife = 30;
-      t.el.style.background = RAINBOW[trailIdx % RAINBOW.length];
-      t.el.style.boxShadow  = `0 0 8px 3px ${RAINBOW[trailIdx % RAINBOW.length]}`;
+      const color = RAINBOW[trailIdx % RAINBOW.length];
+      t.el.style.background = color;
+      t.el.style.boxShadow  = `0 0 8px 3px ${color}`;
 
       // fade all trail bubbles
-      for (const t of trailPool) {
-        if (t.life > 0) {
-          t.life--;
-          const frac = t.life / t.maxLife;
-          t.el.style.left    = t.x + 'px';
-          t.el.style.top     = t.y + 'px';
-          t.el.style.opacity = frac;
-          t.el.style.transform = `scale(${0.4 + frac * 0.8})`;
+      for (let j = 0; j < TRAIL_COUNT; j++) {
+        const tr = trailPool[j];
+        if (tr.life > 0) {
+          tr.life--;
+          const frac = tr.life / tr.maxLife;
+          tr.el.style.transform = `translate3d(${tr.x}px,${tr.y}px,0) scale(${0.4 + frac * 0.8})`;
+          tr.el.style.opacity = frac;
         } else {
-          t.el.style.opacity = 0;
+          tr.el.style.opacity = 0;
         }
       }
 
-      if (starX > window.innerWidth + 100) {
+      if (starX > W + 100) {
         starActive = false;
         candyStar.classList.remove('active');
-        for (const t of trailPool) { t.life = 0; t.el.style.opacity = 0; }
+        for (let j = 0; j < TRAIL_COUNT; j++) {
+          trailPool[j].life = 0;
+          trailPool[j].el.style.opacity = 0;
+        }
         setTimeout(launchStar, 12000 + Math.random() * 18000);
       }
     }
 
-    // first fly-by after 12 seconds
     setTimeout(launchStar, 12000);
 
     // --- NEDM CAT BOUNCE ---
     const cat = document.getElementById('nedm-cat');
-    const CAT_SIZE = Math.min(window.innerWidth, window.innerHeight) * 0.14;
-    let catX = Math.random() * (window.innerWidth  - CAT_SIZE);
-    let catY = Math.random() * (window.innerHeight - CAT_SIZE);
+    const CAT_SIZE = Math.min(W, H) * 0.14;
+    let catX = Math.random() * (W - CAT_SIZE);
+    let catY = Math.random() * (H - CAT_SIZE);
     let catVX = (Math.random() > 0.5 ? 1 : -1) * (2.5 + Math.random() * 1.5);
     let catVY = (Math.random() > 0.5 ? 1 : -1) * (2.5 + Math.random() * 1.5);
 
-    // Lasers
-    const lasers = [];
-    const MAX_LASERS = 6;
+    // Laser pool — pre-create DOM elements, reuse them
+    const MAX_LASER_POOL = 12;  // 6 pairs max
+    const laserPool = [];
+    for (let i = 0; i < MAX_LASER_POOL; i++) {
+      const el = document.createElement('div');
+      el.className = 'laser';
+      el.style.display = 'none';
+      document.body.appendChild(el);
+      laserPool.push({ el, life: 0, active: false });
+    }
+    let laserPoolIdx = 0;
+
+    const eyeOffsets = [{ dx: -14, dy: -6 }, { dx: 14, dy: -6 }];
 
     function spawnLaser() {
-      if (lasers.length >= MAX_LASERS) {
-        const old = lasers.shift();
-        old.el.remove();
-      }
-
-      // shoot from each eye (positions relative to cat center, tuned for photo)
-      const eyeOffsets = [
-        { dx: -14, dy: -6 },  // left eye
-        { dx:  14, dy: -6 }   // right eye
-      ];
-
       for (const eye of eyeOffsets) {
-        const el = document.createElement('div');
-        el.className = 'laser';
-        document.body.appendChild(el);
+        const laser = laserPool[laserPoolIdx % MAX_LASER_POOL];
+        laserPoolIdx++;
 
-        const startX = catX + CAT_SIZE / 2 + eye.dx;
-        const startY = catY + CAT_SIZE / 2 + eye.dy;
+        const startX = catX + CAT_SIZE * 0.5 + eye.dx;
+        const startY = catY + CAT_SIZE * 0.5 + eye.dy;
         const angle  = Math.atan2(catVY, catVX) * (180 / Math.PI);
         const length = 80 + Math.random() * 60;
 
-        el.style.left   = startX + 'px';
-        el.style.top    = startY + 'px';
-        el.style.width  = length + 'px';
-        el.style.transform = `rotate(${angle}deg)`;
-
-        lasers.push({ el, life: 18 });
+        laser.el.style.width   = length + 'px';
+        laser.el.style.transform = `translate3d(${startX}px,${startY}px,0) rotate(${angle}deg)`;
+        laser.el.style.opacity = 1;
+        laser.el.style.display = 'block';
+        laser.life = 18;
+        laser.active = true;
       }
 
-      // Flash the cat red briefly
       cat.style.filter = 'drop-shadow(0 0 8px red) brightness(1.4)';
       setTimeout(() => { cat.style.filter = ''; }, 80);
     }
 
     let laserTick = 0;
-    function updateCat() {
+
+    // --- SINGLE ANIMATION LOOP ---
+    function tick() {
+      // Starfield
+      drawStars();
+
+      // Cat bounce
       catX += catVX;
       catY += catVY;
 
-      if (catX <= 0)                        { catX = 0;                          catVX = Math.abs(catVX); }
-      if (catX >= window.innerWidth - CAT_SIZE)  { catX = window.innerWidth - CAT_SIZE;  catVX = -Math.abs(catVX); }
-      if (catY <= 0)                        { catY = 0;                          catVY = Math.abs(catVY); }
-      if (catY >= window.innerHeight - CAT_SIZE) { catY = window.innerHeight - CAT_SIZE; catVY = -Math.abs(catVY); }
+      const maxX = W - CAT_SIZE;
+      const maxY = H - CAT_SIZE;
+      if (catX <= 0)    { catX = 0;    catVX = Math.abs(catVX); }
+      if (catX >= maxX) { catX = maxX; catVX = -Math.abs(catVX); }
+      if (catY <= 0)    { catY = 0;    catVY = Math.abs(catVY); }
+      if (catY >= maxY) { catY = maxY; catVY = -Math.abs(catVY); }
 
-      cat.style.left = catX + 'px';
-      cat.style.top  = catY + 'px';
+      cat.style.transform = `translate3d(${catX}px,${catY}px,0)`;
 
-      // tick down laser lives
-      for (let i = lasers.length - 1; i >= 0; i--) {
-        lasers[i].life--;
-        lasers[i].el.style.opacity = lasers[i].life / 18;
-        if (lasers[i].life <= 0) {
-          lasers[i].el.remove();
-          lasers.splice(i, 1);
+      // Lasers
+      for (let i = 0; i < MAX_LASER_POOL; i++) {
+        const laser = laserPool[i];
+        if (!laser.active) continue;
+        laser.life--;
+        if (laser.life <= 0) {
+          laser.active = false;
+          laser.el.style.display = 'none';
+        } else {
+          laser.el.style.opacity = laser.life / 18;
         }
       }
 
       laserTick++;
       if (laserTick % 40 === 0) spawnLaser();
 
+      // UFO & Star
       updateUFO();
       updateStar();
 
-      requestAnimationFrame(updateCat);
+      requestAnimationFrame(tick);
     }
-    updateCat();
+
+    requestAnimationFrame(tick);
   </script>
 
 </body>
