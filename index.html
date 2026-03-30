@@ -52,7 +52,6 @@
       height: 22vmin;
       z-index: 6;
       pointer-events: none;
-      filter: drop-shadow(0 0 8px rgba(255,100,100,0.5));
       animation: yell-bounce 0.4s ease-in-out infinite alternate;
     }
 
@@ -68,7 +67,6 @@
       height: 22vmin;
       z-index: 6;
       pointer-events: none;
-      filter: drop-shadow(0 0 10px rgba(80,80,255,0.4));
     }
 
     #tux {
@@ -78,7 +76,6 @@
       height: 26vmin;
       z-index: 6;
       pointer-events: none;
-      filter: drop-shadow(0 0 10px rgba(255,50,50,0.5));
       animation: tux-sway 2.5s ease-in-out infinite;
     }
 
@@ -100,7 +97,7 @@
     #duchovny {
       height: 100%;
       width: auto;
-      filter: drop-shadow(-4px 0 12px rgba(0,180,255,0.6));
+      filter: drop-shadow(-2px 0 6px rgba(0,180,255,0.4));
     }
 
     #thought-bubble {
@@ -125,8 +122,8 @@
     }
 
     @keyframes ufo-glow {
-      0%, 100% { filter: drop-shadow(0 0 8px #00ff88) drop-shadow(0 0 20px #00cc66); }
-      50%       { filter: drop-shadow(0 0 16px #00ffaa) drop-shadow(0 0 40px #00ff88); }
+      0%, 100% { filter: drop-shadow(0 0 8px #00ff88); }
+      50%       { filter: drop-shadow(0 0 14px #00ffaa); }
     }
 
     #ufo.active { display: block; animation: ufo-glow 1s ease-in-out infinite; }
@@ -140,7 +137,6 @@
       pointer-events: none;
       display: none;
       border-radius: 3px;
-      box-shadow: 0 0 10px 3px rgba(0,255,100,0.6);
       will-change: transform;
     }
 
@@ -185,33 +181,19 @@
       white-space: nowrap;
       color: #fff;
       text-shadow:
-        0 0 4px #fff,
-        0 0 10px #fff,
-        0 0 18px #fff,
-        0 0 38px #ff00de,
-        0 0 70px #ff00de,
-        0 0 100px #ff00de,
-        0 0 140px #ff00de;
+        0 0 7px #fff,
+        0 0 30px #ff00de,
+        0 0 80px #ff00de;
       animation: neon-flicker 4s infinite;
       pointer-events: none;
-      -webkit-text-stroke: 1px rgba(255,0,222,0.4);
     }
 
     @keyframes neon-flicker {
       0%, 18%, 22%, 25%, 53%, 57%, 100% {
-        text-shadow:
-          0 0 4px #fff,
-          0 0 10px #fff,
-          0 0 18px #fff,
-          0 0 38px #ff00de,
-          0 0 70px #ff00de,
-          0 0 100px #ff00de,
-          0 0 140px #ff00de;
         opacity: 1;
       }
       19%, 24%, 55% {
-        text-shadow: none;
-        opacity: 0.5;
+        opacity: 0.4;
       }
     }
 
@@ -224,7 +206,7 @@
       width: auto;
       z-index: 6;
       pointer-events: none;
-      filter: drop-shadow(0 0 10px rgba(255, 180, 100, 0.4));
+      filter: drop-shadow(0 0 5px rgba(255, 180, 100, 0.3));
     }
 
     /* RAINY CITY LABS */
@@ -252,7 +234,6 @@
       left: 0; top: 0;
       height: 3px;
       background: linear-gradient(to right, red, orange, yellow);
-      box-shadow: 0 0 6px 2px red;
       z-index: 9;
       pointer-events: none;
       transform-origin: left center;
@@ -370,6 +351,9 @@
     window.addEventListener('resize', () => {
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
+      imgData = ctx.createImageData(W, H);
+      pixels = imgData.data;
+      buf32 = new Uint32Array(imgData.data.buffer);
       initStars();
     });
 
@@ -390,15 +374,28 @@
       }
     }
 
+    // Pre-create ImageData for pixel-level starfield (much faster than 300 stroke calls)
+    let imgData = ctx.createImageData(W, H);
+    let pixels = imgData.data;
+    let buf32 = new Uint32Array(imgData.data.buffer);
+
     function drawStars() {
-      ctx.fillStyle = 'rgba(0,0,0,0.2)';
-      ctx.fillRect(0, 0, W, H);
+      // Fade existing pixels using 32-bit ops (4x fewer iterations)
+      const len32 = buf32.length;
+      for (let j = 0; j < len32; j++) {
+        const v = buf32[j];
+        // Extract RGBA channels, multiply by ~0.82 (210/256), reassemble
+        // Layout is ABGR on little-endian
+        const r = ((v & 0xFF) * 210) >>> 8;
+        const g = (((v >>> 8) & 0xFF) * 210) >>> 8;
+        const b = (((v >>> 16) & 0xFF) * 210) >>> 8;
+        buf32[j] = 0xFF000000 | (b << 16) | (g << 8) | r;
+      }
 
       const cx = W * 0.5, cy = H * 0.5;
       const speed = 12;
+      const invW = 1 / W;
 
-      // Batch all lines into a single path per brightness bucket (8 buckets)
-      ctx.lineCap = 'round';
       for (let i = 0; i < NUM_STARS; i++) {
         starPZ[i] = starZ_[i];
         starZ_[i] -= speed;
@@ -411,23 +408,31 @@
         }
 
         const invZ = 1 / starZ_[i];
-        const invPZ = 1 / starPZ[i];
-        const sx = starX_[i] * invZ * W + cx;
-        const sy = starY_[i] * invZ * H + cy;
-        const px = starX_[i] * invPZ * W + cx;
-        const py = starY_[i] * invPZ * H + cy;
+        const sx = (starX_[i] * invZ * W + cx) | 0;
+        const sy = (starY_[i] * invZ * H + cy) | 0;
 
-        const ratio = 1 - starZ_[i] / W;
-        const size = ratio * 3;
+        if (sx < 0 || sx >= W || sy < 0 || sy >= H) continue;
+
+        const ratio = 1 - starZ_[i] * invW;
         const b = (ratio * 255) | 0;
 
-        ctx.beginPath();
-        ctx.moveTo(px, py);
-        ctx.lineTo(sx, sy);
-        ctx.strokeStyle = `rgb(${b},${b},255)`;
-        ctx.lineWidth = size < 0.5 ? 0.5 : size;
-        ctx.stroke();
+        // Draw a pixel cluster (size based on distance)
+        const size = (ratio * 2.5) | 0;
+        const r = Math.max(size, 1);
+        const color32 = 0xFF000000 | (0xFF << 16) | (b << 8) | b; // ABGR: alpha=FF, B=FF, G=b, R=b
+        for (let dy = -r; dy <= r; dy++) {
+          const py = sy + dy;
+          if (py < 0 || py >= H) continue;
+          const rowOff = py * W;
+          for (let dx = -r; dx <= r; dx++) {
+            const px = sx + dx;
+            if (px < 0 || px >= W) continue;
+            buf32[rowOff + px] = color32;
+          }
+        }
       }
+
+      ctx.putImageData(imgData, 0, 0);
     }
 
     initStars();
@@ -515,7 +520,7 @@
     const RAINBOW = ['#ff0000','#ff7700','#ffee00','#00cc44','#0088ff','#8800ff','#ff00cc'];
     let starX, starY, starVX, starVY, starActive = false;
     const trailPool = [];
-    const TRAIL_COUNT = 18;
+    const TRAIL_COUNT = 10;
 
     for (let i = 0; i < TRAIL_COUNT; i++) {
       const el = document.createElement('div');
@@ -555,7 +560,6 @@
       t.maxLife = 30;
       const color = RAINBOW[trailIdx % RAINBOW.length];
       t.el.style.background = color;
-      t.el.style.boxShadow  = `0 0 8px 3px ${color}`;
 
       // fade all trail bubbles
       for (let j = 0; j < TRAIL_COUNT; j++) {
