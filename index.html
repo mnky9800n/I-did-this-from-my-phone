@@ -259,6 +259,70 @@
       border-radius: 2px;
       will-change: transform, opacity;
     }
+
+    /* NEWS TICKER */
+    #news-ticker {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 30px;
+      z-index: 200;
+      display: flex;
+      align-items: stretch;
+      background: rgba(0,0,18,0.94);
+      border-top: 2px solid #cc0000;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    #ticker-label {
+      flex-shrink: 0;
+      background: #cc0000;
+      color: #fff;
+      font-family: 'Arial Black', Arial, sans-serif;
+      font-weight: 900;
+      font-size: clamp(9px, 1.8vmin, 13px);
+      letter-spacing: 0.07em;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      text-transform: uppercase;
+      white-space: nowrap;
+      border-right: 3px solid #ff5555;
+      text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+    }
+    #ticker-dot {
+      flex-shrink: 0;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff4444;
+      margin: 0 8px;
+      box-shadow: 0 0 6px #ff2222;
+      animation: ticker-blink 1s step-start infinite;
+    }
+    @keyframes ticker-blink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0; }
+    }
+    #ticker-track {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    #ticker-text {
+      position: absolute;
+      white-space: nowrap;
+      color: #f0f0f0;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: clamp(11px, 2vmin, 14px);
+      letter-spacing: 0.04em;
+      will-change: transform;
+    }
+    @keyframes ticker-scroll {
+      from { transform: translateX(100vw); }
+      to   { transform: translateX(-100%); }
+    }
   </style>
 </head>
 <body>
@@ -351,6 +415,15 @@
         fill="#111">I miss Scully</text>
     </svg>
     <img id="duchovny" src="IMG_2211.png" alt="David Duchovny">
+  </div>
+
+  <!-- NEWS TICKER -->
+  <div id="news-ticker">
+    <div id="ticker-label">&#11088; Cosmic Alert</div>
+    <div id="ticker-dot"></div>
+    <div id="ticker-track">
+      <span id="ticker-text"></span>
+    </div>
   </div>
 
   <!-- NEDM CAT -->
@@ -743,6 +816,58 @@
     }
 
     requestAnimationFrame(tick);
+
+    // --- NEWS TICKER ---
+    const walterMessages = [
+      "\u2605 I am watching you, Walter \u2605",
+      "\u2665 The universe shines on you, Walter \u2665",
+      "\u273f Walter, your aura radiates pure cosmic indigo \u273f",
+      "\u2606 Peace and love flow through you always, Walter \u2606",
+      "\u2605 Walter, you are made of stardust and good vibes \u2605",
+      "\u273f The crystals are aligned in your favor today, Walter \u273f",
+      "\u2665 Walter, the dolphins are thinking of you right now \u2665",
+      "\u2606 Your chakras are absolutely immaculate, Walter \u2606",
+      "\u2605 The forest whispers your name on the wind, Walter \u2605",
+      "\u273f Walter, you have achieved enlightenment and it looks incredible on you \u273f",
+      "\u2665 May your kombucha ferment perfectly, Walter \u2665",
+      "\u2606 Walter, the moon is full and it shines for you alone \u2606",
+      "\u2605 You are a beautiful cosmic being of pure light, Walter \u2605",
+      "\u273f Walter, the ley lines converge directly beneath your feet \u273f",
+      "\u2665 The universe has big plans for you, Walter \u2665",
+      "\u2606 Walter, your third eye is wide, wide open \u2606",
+      "\u2605 Every sunrise is a personal gift from the cosmos to you, Walter \u2605",
+      "\u273f Walter, the spirit of the harvest moon blesses your journey \u273f",
+      "\u2665 You are one with the infinite and the infinite loves you, Walter \u2665",
+      "\u2606 Walter, the stars rearranged themselves just for you \u2606",
+      "\u2605 Good vibrations radiate endlessly from your soul, Walter \u2605",
+      "\u273f Walter, namaste \u2014 and also the universe loves you \u273f",
+      "\u2665 You are a flower blooming in the garden of eternity, Walter \u2665",
+      "\u2606 Walter, the ancient crystals hum softly with your name \u2606",
+      "\u2605 The cosmic energy today is 100% Walter-approved \u2605",
+      "\u273f Walter, your vibes are off the charts and the charts are beautiful \u273f",
+      "\u2665 The great tapestry of existence has your face in the center, Walter \u2665",
+      "\u2606 Walter, even the wind is rooting for you \u2606",
+      "\u2605 Science confirms it: Walter emits the highest frequency of love \u2605",
+      "\u273f Walter, a rainbow formed somewhere just because you exist \u273f",
+    ];
+
+    const tickerTextEl = document.getElementById('ticker-text');
+    let walterMsgs = walterMessages.slice().sort(() => Math.random() - 0.5);
+    let walterIdx = 0;
+
+    function showNextTicker() {
+      if (walterIdx >= walterMsgs.length) {
+        walterMsgs = walterMessages.slice().sort(() => Math.random() - 0.5);
+        walterIdx = 0;
+      }
+      tickerTextEl.textContent = walterMsgs[walterIdx++];
+      tickerTextEl.style.animation = 'none';
+      tickerTextEl.offsetHeight; // force reflow to restart animation
+      tickerTextEl.style.animation = 'ticker-scroll 22s linear';
+    }
+
+    tickerTextEl.addEventListener('animationend', showNextTicker);
+    showNextTicker();
   </script>
 
 </body>
