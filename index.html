@@ -319,9 +319,9 @@
       letter-spacing: 0.04em;
       will-change: transform;
     }
-    @keyframes ticker-scroll {
-      from { transform: translateX(100vw); }
-      to   { transform: translateX(-100%); }
+    @keyframes ticker-loop {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
     }
   </style>
 </head>
@@ -852,22 +852,19 @@
     ];
 
     const tickerTextEl = document.getElementById('ticker-text');
-    let walterMsgs = walterMessages.slice().sort(() => Math.random() - 0.5);
-    let walterIdx = 0;
 
-    function showNextTicker() {
-      if (walterIdx >= walterMsgs.length) {
-        walterMsgs = walterMessages.slice().sort(() => Math.random() - 0.5);
-        walterIdx = 0;
-      }
-      tickerTextEl.textContent = walterMsgs[walterIdx++];
-      tickerTextEl.style.animation = 'none';
-      tickerTextEl.offsetHeight; // force reflow to restart animation
-      tickerTextEl.style.animation = 'ticker-scroll 22s linear';
-    }
+    // Build one long continuous string — all messages separated by stars, doubled for seamless loop
+    const sep = '     \u2605     ';
+    const fullRun = walterMessages.join(sep) + sep;
+    tickerTextEl.textContent = fullRun + fullRun;
 
-    tickerTextEl.addEventListener('animationend', showNextTicker);
-    showNextTicker();
+    // Compute duration so speed is consistent regardless of text length.
+    // ~116 px/s (the old ~101 px/s + 15%)
+    requestAnimationFrame(() => {
+      const halfWidth = tickerTextEl.scrollWidth / 2;
+      const duration = halfWidth / 116;
+      tickerTextEl.style.animation = `ticker-loop ${duration}s linear infinite`;
+    });
   </script>
 
 </body>
